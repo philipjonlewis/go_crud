@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +26,7 @@ func bookById(c *gin.Context) {
 	id := c.Param("id")
 	book,err := getBookById(id)
 
-	if err != nil {
+	if err != nil { 
 		c.IndentedJSON(http.StatusNotFound,gin.H{"message":"Book Not Found"})
 		return 
 	}
@@ -109,6 +111,25 @@ func returnBook(c *gin.Context) {
 func main () {
 
 	router := gin.Default()
+
+	router.SetFuncMap(template.FuncMap{
+		"upper": strings.ToUpper,
+	})
+	router.Static("/assets", "./assets")
+	router.LoadHTMLGlob("templates/*.html")
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"content": "This is an index page...",
+		})
+	})
+
+	router.GET("/about", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "about.html", gin.H{
+			"content": "This is an about page and the content is from the main file",
+		})
+	})
+
 
 	router.GET("/books", getBooks)
 
